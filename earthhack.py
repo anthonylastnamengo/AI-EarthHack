@@ -5,7 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from textblob import TextBlob
 
 # Load the dataset
-file_path = '/Users/anthonyngo/Documents/UQ/CSSE1001/Python projects/hackathon/AI EarthHack Dataset.csv'  # Replace with your dataset path
+file_path = 'AI EarthHack Dataset.csv'  # Replace with your dataset path
 data = pd.read_csv(file_path, encoding='ISO-8859-1')
 
 # Ensure all text data is in string format
