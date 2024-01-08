@@ -3,6 +3,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cluster import KMeans
 from sklearn.metrics.pairwise import cosine_similarity
 from textblob import TextBlob
+import openpyxl
+from openpyxl.styles import PatternFill, Font, Alignment
+from openpyxl.utils import get_column_letter
 
 # Load the dataset
 file_path = 'AI EarthHack Dataset.csv'  # Replace with your dataset path
@@ -110,3 +113,47 @@ sorted_final_data = data.sort_values(by='final_score', ascending=False)
 
 # Output the top entries based on the final score
 sorted_final_data[['id', 'problem', 'solution', 'sentiment_score', 'uniqueness_score', 'ce_score', 'final_score']].to_csv('sorted_ideas_adjusted.csv', index=False)
+
+# Assuming 'sorted_final_data' is your DataFrame with the sorted ideas
+# Create a Pandas Excel writer using openpyxl as the engine
+excel_writer = pd.ExcelWriter('sorted_ideas_formatted.xlsx', engine='openpyxl')
+
+# Write the sorted DataFrame to an Excel file
+sorted_final_data.to_excel(excel_writer, index=False, sheet_name='Sorted Ideas')
+
+# You must save the file before you can use openpyxl to access the workbook
+excel_writer._save()
+
+# Now reopen the file using openpyxl to apply the formatting
+workbook = openpyxl.load_workbook('sorted_ideas_formatted.xlsx')
+worksheet = workbook['Sorted Ideas']
+
+# Apply formatting: Set a fill color for the header row and bold font
+header_fill = PatternFill(start_color='FFFF00', end_color='FFFF00', fill_type='solid')
+bold_font = Font(bold=True)
+center_aligned_text = Alignment(horizontal='center')
+for cell in worksheet[1]:
+    cell.fill = header_fill
+    cell.font = bold_font
+    cell.alignment = center_aligned_text
+
+# Set the column width to fit content
+def as_text(value):
+    if value is None:
+        return ""
+    return str(value)
+
+for col in worksheet.columns:
+    max_length = 0
+    column = col[0].column_letter  # Get the column name
+    for cell in col:
+        try:  # Necessary to avoid error on empty cells
+            if len(as_text(cell.value)) > max_length:
+                max_length = len(cell.value)
+        except:
+            pass
+    adjusted_width = (max_length + 2)
+    worksheet.column_dimensions[column].width = adjusted_width
+
+# Save the workbook with formatting
+workbook.save('sorted_ideas_formatted.xlsx')
